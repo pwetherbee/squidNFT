@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html class="fvcjtygj idc0_332">
+  <head>
+    <title></title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <style>
+      html {
+        color: aliceblue;
+        background-color: #111111;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+          sans-serif;
+        font-style: italic;
+        font-size: small;
+      }
+      a {
+        color: rgb(173, 173, 173);
+        text-decoration: none;
+      }
+      a:visited {
+        color: rgb(173, 173, 173);
+        text-decoration: none;
+      }
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+      .gameContainer {
+        white-space: nowrap;
+        /* overflow: hidden; */
+        text-overflow: ellipsis;
+        display: flex;
+        flex: none;
+        /* flex-direction: row; */
+        flex-shrink: 0;
+        flex-basis: auto;
+        justify-content: space-between;
+        width: 100%;
+      }
+      .remaining {
+        width: 20rem;
+        overflow-wrap: unset;
+        color: rgb(129, 199, 132);
+        text-align: left;
+      }
+      .eliminated {
+        /* text-decoration: line-through; */
+        width: 20rem;
+        overflow-wrap: unset;
+        color: rgb(229, 115, 115);
+        text-align: left;
+      }
+      .show {
+        opacity: 1;
+      }
+      li.new-item {
+        opacity: 0;
+        animation: new-item-animation 0.3s linear forwards;
+      }
+
+      @keyframes new-item-animation {
+        from {
+          opacity: 0;
+          /* transform: translateY(-400px); */
+        }
+
+        to {
+          opacity: 1;
+          /* transform: translateY(0); */
+        }
+      }
+      li.removed-item {
+        text-decoration: line-through;
+        color: rgb(255, 183, 77);
+        animation: removed-item-animation 0.6s
+          cubic-bezier(0.55, -0.04, 0.91, 0.94) forwards;
+      }
+
+      @keyframes removed-item-animation {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        to {
+          opacity: 0;
+          transform: scale(0);
+        }
+      }
+
+      li.restored-item {
+        animation: openspace 0.3s ease forwards,
+          restored-item-animation 0.3s 0.3s ease-out forwards;
+      }
+
+      @keyframes openspace {
+        to {
+          height: auto;
+        }
+      }
+
+      @keyframes restored-item-animation {
+        0% {
+          opacity: 0;
+          transform: scale(4);
+        }
+
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .info {
+        color: #ed1477;
+      }
+      @media screen and (max-width: 545px) {
+        .gameContainer {
+          text-overflow: ellipsis;
+          display: flexbox;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="info">
+      <h2>Squid Game</h2>
+      <p>
+        Days remaining: <span class="daysremaining"></span> || Total prize:
+        <span class="totalprize">100000</span>
+      </p>
+    </div>
+    <img />
+    <!-- <li class="frame"></li> -->
+    <div class="gameContainer">
+      <ul class="remaining">
+        <h3>Remaining</h3>
+      </ul>
+      <ul class="eliminated">
+        <h3>Eliminated</h3>
+      </ul>
+    </div>
+
+    <!-- <h2 class="author"></h2> -->
+    <!-- <button class="toggleBtn">Toggle Creations/Collections</button> -->
+    <!-- <div class="speedBtnContainer">
+      <span
+        ><button value="30" class="speedBtn">Slow</button
+        ><button value="10" class="speedBtn">Med</button
+        ><button value="5" class="speedBtn">Fast</button></span
+      >
+    </div> -->
+    <script src="main.js"></script>
+  </body>
+</html>
