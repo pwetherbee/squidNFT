@@ -1,22 +1,30 @@
 <!DOCTYPE html>
-<html class="fvcjtygj idc0_332">
+<html>
   <head>
     <title></title>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1"
+      charset="utf-8"
     />
+    <link rel="stylesheet" type="text/css" href="snowflakes.css" />
     <style>
       html {
+        /* overflow: hidden; */
         color: aliceblue;
         background-color: #111111;
+        overflow: hidden;
         height: 100%;
         display: flex;
         justify-content: center;
+        /* border: solid 5px #ed1477; */
         font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
           sans-serif;
-        font-style: italic;
+        /* font-style: italic; */
         font-size: small;
+      }
+      img {
+        max-width: 100%;
       }
       a {
         color: rgb(173, 173, 173);
@@ -31,9 +39,67 @@
         margin: 0;
         padding: 0;
       }
+
+      @-webkit-keyframes rainbow {
+        0% {
+          background-position: 0% 82%;
+        }
+        50% {
+          background-position: 100% 19%;
+        }
+        100% {
+          background-position: 0% 82%;
+        }
+      }
+      @-moz-keyframes rainbow {
+        0% {
+          background-position: 0% 82%;
+        }
+        50% {
+          background-position: 100% 19%;
+        }
+        100% {
+          background-position: 0% 82%;
+        }
+      }
+      @-o-keyframes rainbow {
+        0% {
+          background-position: 0% 82%;
+        }
+        50% {
+          background-position: 100% 19%;
+        }
+        100% {
+          background-position: 0% 82%;
+        }
+      }
+      @keyframes rainbow {
+        0% {
+          background-position: 0% 82%;
+        }
+        50% {
+          background-position: 100% 19%;
+        }
+        100% {
+          background-position: 0% 82%;
+        }
+      }
+      .info {
+        overflow: hidden;
+        border: 2px solid #ed1477;
+        /* border-radius: 10%; */
+        box-shadow: 0 0 10px #ed1477;
+        text-align: center;
+        color: #ed1477;
+      }
       .gameContainer {
+        /* border: 2px solid ; */
+        /* box-shadow: 0 0 50px #4599b2;
+        background-color: #4599b23b; */
         white-space: nowrap;
-        /* overflow: hidden; */
+        height: 65vh;
+        overflow: scroll;
+        overflow-x: hidden;
         text-overflow: ellipsis;
         display: flex;
         flex: none;
@@ -44,17 +110,29 @@
         width: 100%;
       }
       .remaining {
+        font-size: 90%;
         width: 20rem;
         overflow-wrap: unset;
-        color: rgb(129, 199, 132);
+        /* color: rgb(129, 199, 132); */
+        color: #44b8a2;
         text-align: left;
       }
       .eliminated {
+        font-size: 90%;
         /* text-decoration: line-through; */
         width: 20rem;
         overflow-wrap: unset;
-        color: rgb(229, 115, 115);
+        /* color: rgb(230, 53, 53); */
+        color: #df445c;
         text-align: left;
+      }
+      .remaining_player {
+        cursor: default;
+      }
+      .remaining_player:hover {
+        color: #ffffff;
+        transform: scale(1.2) translateX(3rem);
+        transition: all 0.3s;
       }
       .show {
         opacity: 1;
@@ -64,6 +142,96 @@
         animation: new-item-animation 0.3s linear forwards;
       }
 
+      li.removed-item {
+        text-decoration: line-through;
+        color: rgb(255, 183, 77);
+        animation: removed-item-animation 0.6s
+          cubic-bezier(0.55, -0.04, 0.91, 0.94) forwards;
+      }
+
+      li.restored-item {
+        animation: openspace 0.3s ease forwards,
+          restored-item-animation 0.3s 0.3s ease-out forwards;
+      }
+      .modal {
+        color: bisque;
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0, 0, 0); /* Fallback color */
+        background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+      }
+
+      /* Modal Content/Box */
+      .modal-content {
+        text-align: center;
+        background-color: #000000;
+        margin: 10% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+        max-width: 500px;
+      }
+
+      /* The Close Button */
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 15px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: rgb(206, 206, 206);
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .showPrizeBtn {
+        /* border: 2px solid #ed1477; */
+        border: none;
+        cursor: pointer;
+        border-radius: 5%;
+        color: #ffffff;
+        background: linear-gradient(
+          124deg,
+          #ff2400,
+          #e81d1d,
+          #e8b71d,
+          #e3e81d,
+          #1de840,
+          #1ddde8,
+          #2b1de8,
+          #dd00f3,
+          #dd00f3
+        );
+        background-size: 1800% 1800%;
+
+        -webkit-animation: rainbow 18s ease infinite;
+        -z-animation: rainbow 18s ease infinite;
+        -o-animation: rainbow 18s ease infinite;
+        animation: rainbow 18s ease infinite;
+      }
+      .playerListTitle {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        text-align: center;
+      }
+
+      @media screen and (max-width: 545px) {
+        .gameContainer {
+          text-overflow: ellipsis;
+          display: flexbox;
+          flex-direction: column;
+        }
+      }
       @keyframes new-item-animation {
         from {
           opacity: 0;
@@ -75,13 +243,11 @@
           /* transform: translateY(0); */
         }
       }
-      li.removed-item {
-        text-decoration: line-through;
-        color: rgb(255, 183, 77);
-        animation: removed-item-animation 0.6s
-          cubic-bezier(0.55, -0.04, 0.91, 0.94) forwards;
+      @keyframes openspace {
+        to {
+          height: auto;
+        }
       }
-
       @keyframes removed-item-animation {
         from {
           opacity: 1;
@@ -91,17 +257,6 @@
         to {
           opacity: 0;
           transform: scale(0);
-        }
-      }
-
-      li.restored-item {
-        animation: openspace 0.3s ease forwards,
-          restored-item-animation 0.3s 0.3s ease-out forwards;
-      }
-
-      @keyframes openspace {
-        to {
-          height: auto;
         }
       }
 
@@ -116,38 +271,88 @@
           transform: scale(1);
         }
       }
-
-      .info {
-        color: #ed1477;
-      }
-      @media screen and (max-width: 545px) {
-        .gameContainer {
-          text-overflow: ellipsis;
-          display: flexbox;
-          flex-direction: column;
-        }
-      }
     </style>
   </head>
   <body>
+    <div class="snowflake square"></div>
+    <div class="snowflake square"></div>
+    <div class="snowflake square"></div>
+    <div class="snowflake square"></div>
+    <div class="snowflake triangle">Δ</div>
+    <div class="snowflake triangle">Δ</div>
+    <div class="snowflake triangle">Δ</div>
+    <div class="snowflake triangle">Δ</div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
     <div class="info">
-      <h2>Squid Game</h2>
-      <p>
-        Days remaining: <span class="daysremaining"></span> || Total prize:
-        <span class="totalprize">100000</span>
-      </p>
+      <h1>Squid Game 오징어 게임</h1>
+      <h2 class="timeremainingcontainer">
+        Day <span class="currDay">0</span> | Time Remaining until next round:
+        <span class="timeRemaining">0</span>
+      </h2>
+      <h3><button class="showPrizeBtn">🎁</button></h3>
     </div>
     <img />
     <!-- <li class="frame"></li> -->
     <div class="gameContainer">
       <ul class="remaining">
-        <h3>Remaining</h3>
+        <h3 class="playerListTitle">Remaining O</h3>
       </ul>
       <ul class="eliminated">
-        <h3>Eliminated</h3>
+        <h3 class="playerListTitle">Eliminated X</h3>
       </ul>
     </div>
-
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">close</span>
+        <h2>Not enough players to begin</h2>
+        <p>
+          <span class="numplayersrequired">x</span> more players are needed to
+          start the game
+        </p>
+        <p>Close this window to show who has entered so far</p>
+        <p>ps: A player can get multiple spaces</p>
+      </div>
+    </div>
+    <div id="winnermodal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">close</span>
+        <h2>
+          The winner is: <span class="winnernum" style="color: white"></span>
+        </h2>
+        <a class="winnerlink" target="_blank" rel="noopener noreferrer"
+          ><h3 class="winner"></h3
+        ></a>
+        <h4>
+          The prize will be sent to your collection within 24 hours. Please do
+          not swap this game OBJKT during that period or the item may be sent to
+          the wrong address.
+        </h4>
+      </div>
+    </div>
+    <div id="prizeModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <h2 class="prizeInfo">
+          <span class="prizeTitle"></span> by <span class="prizeAuthor"></span
+          ><span id="closeprize" class="close">close</span>
+        </h2>
+        <h4>Latest Sell Value: <span class="prizeValue"></span> tez</h4>
+        <a class="prizeLink" href="">
+          <img
+            class="prizeImage"
+            src="https://ipfs.io/ipfs/QmaEGFuWFqVgdu3njLfoag8r75T9S5ZBDaDaimbBGq7eGE"
+          />
+        </a>
+      </div>
+    </div>
     <!-- <h2 class="author"></h2> -->
     <!-- <button class="toggleBtn">Toggle Creations/Collections</button> -->
     <!-- <div class="speedBtnContainer">
@@ -157,6 +362,7 @@
         ><button value="5" class="speedBtn">Fast</button></span
       >
     </div> -->
-    <script src="main.js"></script>
   </body>
+  <script src="main.js" />
+  <script></script>
 </html>

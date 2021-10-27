@@ -194,7 +194,6 @@ async function fetchCreatedOBJKTs(address) {
     console.error(errors);
   }
   const result = data.hic_et_nunc_token;
-  console.log({ result });
   return result;
 }
 
@@ -212,7 +211,7 @@ async function fetchCollectedOBJKTs(address) {
     console.error(errors);
   }
   const result = data.hic_et_nunc_token_holder;
-  console.log({ result });
+  // console.log({ result });
   return result;
 }
 
@@ -230,7 +229,7 @@ async function fetchOBJKTPriceHistory(token) {
     console.error(errors);
   }
   const result = data.hic_et_nunc_trade;
-  console.log({ result });
+  // console.log({ result });
   return result;
 }
 
@@ -362,10 +361,49 @@ const getHolders = function (objktDetails) {
   return holders.filter((holder) => !blacklist.includes(holder.address));
 };
 
-const getOGBuyers = function (objktDetails) {
+const getOGBuyers = function (objktDetails, address) {
+  // console.log(address);
   return objktDetails.trades
-    .filter((trade) => trade.seller.name == "xor")
-    .map((trade, i) => ({ ...trade.buyer, num: i + 1 }));
+    .filter((trade) => trade.seller.address == address)
+    .map((trade, i) => ({
+      ...trade.buyer,
+      num: i + 1,
+      timestamp: trade.timestamp,
+    }));
+};
+
+const getLatestOwners = function (trades, address) {
+  // create owners array
+  const owners = [];
+  // loop through trades
+  for (let i = 0; i < trades.length; i++) {
+    // handle multiple sales at once
+    for (let j = 0; j < trades[i].amount; j++) {
+      // case 1: if seller is creator, add new entry
+      if (trades[i].seller.address == address) {
+        owners.push({
+          ...trades[i].buyer,
+          num: i + 1,
+          timestamp: trades[i].timestamp,
+        });
+      } else {
+        // case 2: if seller is not creator, replace first instance of seller with buyer
+        // find index in owners array
+        const firstSale = owners.findIndex(
+          (owner) => owner.address == trades[i].seller.address
+        );
+        // swap owners
+        owners[firstSale] = {
+          ...trades[i].buyer,
+          num: owners[firstSale].num,
+          timestamp: owners[firstSale].timestamp,
+        };
+        // console.log(firstSale);
+      }
+    }
+  }
+  // console.log("owners:", owners);
+  return owners;
 };
 
 const getDaysSinceCreation = function (timestamp) {
@@ -392,9 +430,9 @@ const initRenderLists = function (players) {
     // add to remaining list
     remaining.insertAdjacentHTML(
       "beforeend",
-      `<li id="${i}" class="remaining_player new-item">${player.num}. ${
-        player.name || player.address
-      }<li>`
+      `<li id="${i}" class="remaining_player new-item"><span style="color:white">${
+        player.num
+      }</span> ${player.name || player.address}<li>`
     );
     eliminated.insertAdjacentHTML(
       "beforeend",
@@ -408,84 +446,150 @@ const initRenderLists = function (players) {
     eliminatedPlayers: document.querySelectorAll(".eliminated_player"),
   };
 };
-const run = async function (creatorAddress, tag, threshold) {
+
+const renderTimeremaining = function (timearray, initial) {
+  const lastRound = timearray.length
+    ? +new Date(timearray[timearray.length - 1])
+    : initial;
+  // console.log("last round:", lastRound);
+  // console.log();
+  String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10);
+    var hours = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - hours * 3600) / 60);
+    var seconds = sec_num - hours * 3600 - minutes * 60;
+
+    if (hours < 10) {
+      hours = "0" + hours;
+    }
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    if (seconds < 10) {
+      seconds = "0" + seconds;
+    }
+    return hours + ":" + minutes + ":" + seconds;
+  };
+  const timerVal = document.querySelector(".timeRemaining");
+  // console.log(new Date().getTime() - lastRound);
+  let startTime = (lastRound + 1000 * 3600 * 24) / 1000; // database unix-timestamp value
+  setInterval(() => {
+    let curTime = new Date().getTime() / 1000;
+    timerVal.innerText = `${Math.max(startTime - curTime, 0)}`.toHHMMSS();
+  }, 1000);
+};
+const renderPrizeDetails = function (prizeOBJKT) {
+  document.querySelector(
+    ".prizeTitle"
+  ).textContent = `${prizeOBJKT.title} #${prizeOBJKT.id}`;
+  document.querySelector(".prizeAuthor").textContent =
+    prizeOBJKT.creator.name || prizeOBJKT.creator.address;
+  document.querySelector(".prizeValue").textContent =
+    prizeOBJKT.trades?.slice(-1)[0].swap?.price / 1000000;
+  document.querySelector(
+    ".prizeLink"
+  ).href = `https://www.hicetnunc.xyz/objkt/${prizeOBJKT.id}`;
+  document.querySelector(".prizeImage").src =
+    "https://ipfs.io/ipfs/" + prizeOBJKT.display_uri.split("//").slice(-1)[0];
+};
+
+const run = async function (creatorAddress, tag, threshold, prizeID) {
   try {
+    // TODO: Show Prize
+    const prizeOBJKTDetails = await fetchOBJKTDetails(prizeID);
+    renderPrizeDetails(prizeOBJKTDetails);
+    console.log("prize:", prizeOBJKTDetails);
+    const prizeBtn = document
+      .querySelector(".showPrizeBtn")
+      .addEventListener("click", () => {
+        document.getElementById("prizeModal").style.display = "block";
+        document.getElementById("closeprize").addEventListener("click", () => {
+          document.getElementById("prizeModal").style.display = "none";
+        });
+      });
     // Get objkt by address and tag
     const thisCreatorsOBJKTs = await fetchCreatedOBJKTs(creatorAddress);
     const thisOBJKT = getOBJKTbyTag(thisCreatorsOBJKTs, tag.toLowerCase());
-    console.log(thisOBJKT);
+    // console.log(thisOBJKT);
     // Handle objkt not found
     if (!thisOBJKT.length) {
       throw new Error(
         `Cannot find object in address ${creatorAddress} with tag ${tag}`
       );
     }
-    // const thisOBJKTID = thisOBJKT[0].id;
-    const thisOBJKTID = 398497;
-    // Get Current owner of OBJKT
-    // const tokenHolders = thisOBJKT[0].token_holders;
-    // console.log(tokenHolders);
-    // // const { address: currAddress, name: currName } =
-    // //   thisOBJKT[0].token_holders[0].holder;
-    // // console.log(currAddress);
-    // let currAddress, name;
-    // if (thisOBJKT[0].trades.length) {
-    //   const { address, name } = thisOBJKT[0].trades[0].buyer;
-    //   [currAddress, currName] = [address, name];
-    // } else {
-    //   [currAddress, currName] = [creatorAddress, "soapbox"];
-    // }
+    const thisOBJKTID = thisOBJKT[0].id;
 
     // Get OBJKT details
     const thisOBJKTDetails = await fetchOBJKTDetails(thisOBJKTID);
-    console.log(thisOBJKTDetails);
+
+    // console.log(thisOBJKTDetails);
     // get holders
     // const holders = getHolders(thisOBJKTDetails);
     // get users who bought from creator
-    const holders = getOGBuyers(thisOBJKTDetails);
-    console.log(holders);
-
+    // let holders = getOGBuyers(thisOBJKTDetails, creatorAddress);
+    let holders = getLatestOwners(thisOBJKTDetails.trades, creatorAddress);
+    // console.log(holders);
+    const tracker = initRenderLists(holders.slice(0, threshold));
     // Only initiate when number of holders reaches threshold
     if (!(holders.length >= threshold)) {
+      const btn = document.getElementById("myBtn");
+      const modal = document.getElementById("myModal");
+      const span = document.getElementsByClassName("close")[0];
       console.log("not enough holders for game to begin");
+      // Render modal with not enough players sign
+      document.querySelector(".numplayersrequired").textContent =
+        threshold - holders.length;
+      modal.style.display = "block";
+      span.onclick = function () {
+        modal.style.display = "none";
+      };
       return;
     }
+
+    // Begin game
+
+    // ensure holders are limited to the exact amount
+
+    // console.log(holders);
+    holders = holders.slice(0, threshold);
+    // console.log("holders after slicing");
+    // console.log(holders);
     console.log("Game has begun");
-    const timestamp = thisOBJKTDetails.timestamp;
+    const timestamp = holders[holders.length - 1].timestamp;
     const daysSince = getDaysSinceCreation(timestamp);
-    // Display days remaining
-    document.querySelector(".daysremaining").textContent = Math.max(
-      6 - daysSince,
-      0
-    );
-    // generate dates for each day since
     const datesSince = generateDatesSince(timestamp, daysSince);
 
-    console.log(datesSince);
+    // Render timer to start
+    renderTimeremaining(datesSince, +new Date(timestamp));
+
+    // console.log(datesSince);
     const dateSeeds = await Promise.all(
       datesSince.map(async (date) => {
         const data = await fetchRandomStatsByDate(date);
         return Math.floor(data.aggregate.avg.price / data.aggregate.count);
       })
     );
-    console.log("dateseed:");
-    console.log(dateSeeds);
+    // console.log("dateseed:");
+    // console.log(dateSeeds);
     const frame = document.querySelector(".frame");
     // const testData = [...Array(22).keys()];
     let remainingByRound = [...holders];
-    const tracker = initRenderLists(holders);
+
     // frame.innerHTML = `${remainingByRound.map(
     //   (player) => `<ul>${player.num}. ${player.name || player.address}</ul>`
     // )}`;
     // use self invoking function for time delay to run game
+    const currday = document.querySelector(".currDay");
     (function runGame(day) {
       if (day > dateSeeds.length - 1) {
         return;
       }
+
       setTimeout(() => {
         // Seed data
+        currday.textContent = day + 1;
         const dateSeed = dateSeeds[day];
-        seedRandomizer1(dateSeed + 2);
+        seedRandomizer1(dateSeed + 1);
         const minRemaining = day;
         const eliminated = [];
         // Eliminate players according to option 1
@@ -506,22 +610,18 @@ const run = async function (creatorAddress, tag, threshold) {
               tracker.remainingPlayers[player.num - 1].classList.add(
                 "removed-item"
               );
-              setTimeout(
-                () =>
-                  tracker.remainingPlayers[
-                    player.num - 1
-                  ].parentNode.removeChild(
-                    tracker.remainingPlayers[player.num - 1]
-                  ),
-                1000
-              );
+              setTimeout(() => {
+                tracker.remainingPlayers[player.num - 1].parentNode.removeChild(
+                  tracker.remainingPlayers[player.num - 1]
+                );
+              }, 1000);
             }
             return remains;
           }
         });
         // console.log(remainingByRound);
-        console.log("eliminated");
-        console.log(eliminated);
+        // console.log("eliminated");
+        // console.log(eliminated);
         // Ensure at least some players remain, else do it again
         if (day >= 5) {
           // only select one person
@@ -549,11 +649,28 @@ const run = async function (creatorAddress, tag, threshold) {
             }
             return remains;
           });
-          // TODO: Run winner sequence
+          // Run winner sequence
+          setTimeout(() => {
+            const winnermodal = document.getElementById("winnermodal");
+            const winner = document.querySelector(".winner");
+            const span = document.getElementsByClassName("close")[1];
+            const winnerLink = document.querySelector(".winnerlink");
+            span.onclick = function () {
+              winnermodal.style.display = "none";
+            };
+            winner.textContent =
+              remainingByRound[0].name || remainingByRound[0].address;
+            winnerLink.href = `https://www.hicetnunc.xyz/tz/${remainingByRound[0].address}`;
+            winnermodal.style.display = "block";
+          }, 1500);
+
+          // winnerspan.onclick = function () {
+          //   winnermodal.style.display = "none";
+          // };
         }
 
         runGame(day + 1);
-      }, 2000);
+      }, 1500);
     })(0);
 
     // frame.textContent = "Remaining Players: ";
@@ -568,7 +685,7 @@ const run = async function (creatorAddress, tag, threshold) {
   } catch (e) {
     console.log(e);
     // Render refresh request
-    document.querySelector(".frame").insertAdjacentHTML(
+    document.querySelector(".info").insertAdjacentHTML(
       "afterbegin",
       `<h3>The HicDex API recieved too many requests. This happens from time to time. Please wait 20 seconds to refresh</h3>
         `
@@ -579,7 +696,8 @@ const run = async function (creatorAddress, tag, threshold) {
 
 // Set creator info and run program
 
-const creatorAddress = "tz1gsR67rvm99Cuh1EtqxwSnoKwvtzEMaTS5";
-const searchTag = "goldframe1"; //6830F83F7F fc43d9f93a3bb
-const threshold = 4;
-run(creatorAddress, searchTag, threshold).catch();
+const creatorAddress = "tz1UT9xFATwBZN9qwMa4YsoRWGKpVpnPMoui";
+const searchTag = "squidgamev3"; //6830F83F7F fc43d9f93a3bb
+const threshold = 100;
+const prizeID = 448882;
+run(creatorAddress, searchTag, threshold, prizeID).catch();
