@@ -24,14 +24,14 @@
         font-size: small;
       }
       img {
-        max-width: 100%;
+        max-width: 90%;
       }
       a {
-        color: rgb(173, 173, 173);
+        color: rgb(255, 255, 255);
         text-decoration: none;
       }
       a:visited {
-        color: rgb(173, 173, 173);
+        color: rgb(255, 255, 255);
         text-decoration: none;
       }
       ul {
@@ -171,7 +171,7 @@
       .modal-content {
         text-align: center;
         background-color: #000000;
-        margin: 10% auto; /* 15% from the top and centered */
+        margin: 5% auto; /* 15% from the top and centered */
         padding: 20px;
         border: 1px solid #888;
         width: 80%; /* Could be more or less, depending on screen size */
@@ -278,10 +278,18 @@
     <div class="snowflake square"></div>
     <div class="snowflake square"></div>
     <div class="snowflake square"></div>
+    <div class="snowflake square"></div>
+    <div class="snowflake square"></div>
     <div class="snowflake triangle">Δ</div>
     <div class="snowflake triangle">Δ</div>
     <div class="snowflake triangle">Δ</div>
     <div class="snowflake triangle">Δ</div>
+    <div class="snowflake triangle">Δ</div>
+    <div class="snowflake triangle">Δ</div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
     <div class="snowflake"></div>
     <div class="snowflake"></div>
     <div class="snowflake"></div>
@@ -316,6 +324,17 @@
           <span class="numplayersrequired">x</span> more players are needed to
           start the game
         </p>
+        <h2 style="color: rgb(72, 255, 0)">The Prize:</h2>
+        <h2 class="prizeInfo">
+          <span class="prizeTitle"></span> by <span class="prizeAuthor"></span>
+        </h2>
+        <h4>Latest Sell Value: <span class="prizeValue"></span> tez</h4>
+        <a class="prizeLink" href="">
+          <img
+            class="prizeImage"
+            src="https://ipfs.io/ipfs/QmaEGFuWFqVgdu3njLfoag8r75T9S5ZBDaDaimbBGq7eGE"
+          />
+        </a>
         <p>Close this window to show who has entered so far</p>
         <p>ps: A player can get multiple spaces</p>
       </div>
@@ -325,7 +344,7 @@
       <div class="modal-content">
         <span class="close">close</span>
         <h2>
-          The winner is: <span class="winnernum" style="color: white"></span>
+          The Winner is <span class="winnernum" style="color: white"> </span>
         </h2>
         <a class="winnerlink" target="_blank" rel="noopener noreferrer"
           ><h3 class="winner"></h3

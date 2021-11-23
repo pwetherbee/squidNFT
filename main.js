@@ -479,18 +479,37 @@ const renderTimeremaining = function (timearray, initial) {
   }, 1000);
 };
 const renderPrizeDetails = function (prizeOBJKT) {
-  document.querySelector(
-    ".prizeTitle"
-  ).textContent = `${prizeOBJKT.title} #${prizeOBJKT.id}`;
-  document.querySelector(".prizeAuthor").textContent =
-    prizeOBJKT.creator.name || prizeOBJKT.creator.address;
-  document.querySelector(".prizeValue").textContent =
-    prizeOBJKT.trades?.slice(-1)[0].swap?.price / 1000000;
-  document.querySelector(
-    ".prizeLink"
-  ).href = `https://www.hicetnunc.xyz/objkt/${prizeOBJKT.id}`;
-  document.querySelector(".prizeImage").src =
-    "https://ipfs.io/ipfs/" + prizeOBJKT.display_uri.split("//").slice(-1)[0];
+  document
+    .querySelectorAll(".prizeTitle")
+    .forEach(
+      (el) => (el.textContent = `${prizeOBJKT.title} (#${prizeOBJKT.id})`)
+    );
+  document
+    .querySelectorAll(".prizeAuthor")
+    .forEach(
+      (el) =>
+        (el.textContent = prizeOBJKT.creator.name || prizeOBJKT.creator.address)
+    );
+
+  document
+    .querySelectorAll(".prizeValue")
+    .forEach(
+      (el) =>
+        (el.textContent = prizeOBJKT.trades?.slice(-1)[0].swap?.price / 1000000)
+    );
+  document
+    .querySelectorAll(".prizeLink")
+    .forEach(
+      (el) => (el.href = `https://www.hicetnunc.xyz/objkt/${prizeOBJKT.id}`)
+    );
+  document
+    .querySelectorAll(".prizeImage")
+    .forEach(
+      (el) =>
+        (el.src =
+          "https://ipfs.io/ipfs/" +
+          prizeOBJKT.display_uri.split("//").slice(-1)[0])
+    );
 };
 
 const run = async function (creatorAddress, tag, threshold, prizeID) {
@@ -699,5 +718,5 @@ const run = async function (creatorAddress, tag, threshold, prizeID) {
 const creatorAddress = "tz1UT9xFATwBZN9qwMa4YsoRWGKpVpnPMoui";
 const searchTag = "squidgamev3"; //6830F83F7F fc43d9f93a3bb
 const threshold = 100;
-const prizeID = 448882;
+const prizeID = 507619;
 run(creatorAddress, searchTag, threshold, prizeID).catch();
